@@ -1,5 +1,6 @@
 /.vs
-/Debug
-/OlimpChecker/Debug
 /x64
 /OlimpChecker/x64
+/RunOlimpChecker/x64
+/Tests/x64
+/packages/

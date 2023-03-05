@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DllExport.h"
+
 #include "Types.h"
 #include "Response.h"
 #include <unordered_map>
@@ -10,7 +12,7 @@ enum class RequestType
 	Post
 };
 
-struct RequestParams
+struct DLL_EXPORT RequestParams
 {
 	std::string GetParams() const;
 
@@ -18,7 +20,7 @@ struct RequestParams
 	std::unordered_map<std::string, std::string> m_Params;
 };
 
-struct RequestData
+struct DLL_EXPORT RequestData
 {
 	RequestData() = default;
 	RequestData(const char url[]);
@@ -29,7 +31,7 @@ struct RequestData
 	RequestParams m_Params;
 };
 
-class Request
+class DLL_EXPORT Request
 {
 public:
 	Request() = default;
