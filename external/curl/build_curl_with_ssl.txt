@@ -1,0 +1,22 @@
+Run "x64 Native Tools Command Prompt for VS 2022"
+
+set ROOT_PATH=C:\Users\Admin\Downloads\curl
+download openssl to ROOT_PATH
+download curl to ROOT_PATH
+
+cd "$ROOT_PATH\curl\projects"
+build-openssl.bat vc15 x64 debug
+
+copy $ROOT_PATH\openssl\build\Win64\VC15\LIB Debug\* $ROOT_PATH\deps\libs
+copy $ROOT_PATH\openssl\build\Win64\VC15\LIB Debug\include $ROOT_PATH\deps\include
+
+cd ..\winbuild
+nmake /F Makefile.vc mode=static WITH_SSL=static MACHINE=x64 ENABLE_SSPI=no ENABLE_IDN=no ENABLE_WINSSL=no DEBUG=yes GEN_PDB=no ENABLE_IPV6=yes
+
+copy .*lib and *.pdb from $ROOT_PATH\deps\lib to debug folder in your project
+copy *.lib and include/ from $ROOT_PATH\curl\builds\libcurl-vc-x64-debug-static-ssl-static-ipv6 to debug folder in your project
+
+Do the same for Release
+
+define CURL_STATICLIB
+add libcrypto.lib;libssl.lib;libcurl_a.lib;CRYPT32.LIB;Wldap32.lib;Ws2_32.lib;
