@@ -3,33 +3,8 @@
 #include "DllExport.h"
 
 #include "Types.h"
+#include "RequestData.h"
 #include "Response.h"
-#include <unordered_map>
-
-enum class RequestType
-{
-	Get,
-	Post
-};
-
-struct DLL_EXPORT RequestParams
-{
-	std::string GetParams() const;
-
-	RequestType m_Type = RequestType::Get;
-	std::unordered_map<std::string, std::string> m_Params;
-};
-
-struct DLL_EXPORT RequestData
-{
-	RequestData() = default;
-	RequestData(const char url[]);
-	std::string GetUrl() const { return m_Server + m_Path; }
-
-	std::string m_Server;
-	std::string m_Path;
-	RequestParams m_Params;
-};
 
 class DLL_EXPORT Request
 {
