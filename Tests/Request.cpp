@@ -1,18 +1,38 @@
-#include "pch.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
+#include "include/IRequestImpl.h"
 #include "include/Request.h"
 
-TEST(TestRequest, ParseQuery)
+using namespace ::testing;
+
+struct RequestImplMock : public IRequestImpl
+{
+	MOCK_METHOD(void, SetPostParams, (std::string params), (override));
+	MOCK_METHOD(Response, Perform, (const std::string& url), (override));
+};
+
+TEST(TestRequest, ParseEmptyUrl)
+{
+	constexpr char url[] = "http://sub.test.com/path/";
+
+	Request data(url);
+	EXPECT_EQ(data.Server(), "http://sub.test.com");
+	EXPECT_EQ(data.Path(), "/path/");
+	EXPECT_EQ(data.Url(), url);
+}
+
+TEST(TestRequest, ParseGetParams)
 {
 	constexpr char url[] = "https://sub.test.com/path/test/?param1=23&param2=12";
 
-	RequestData data(url);
-	EXPECT_EQ(data.GetServer(), "https://sub.test.com");
-	EXPECT_EQ(data.GetPath(), "/path/test/");
-	EXPECT_EQ(data.GetUrl(), url);
+	Request data(url);
+	EXPECT_EQ(data.Server(), "https://sub.test.com");
+	EXPECT_EQ(data.Path(), "/path/test/");
+	EXPECT_EQ(data.Url(), url);
 
-	auto& params = data.GetParams();
-	auto fnCheckParam = [&params](const char key[], const char value[])
+	auto& params = data.Get();
+	auto fnCheckParam = [&params](const char* key, const char* value)
 	{
 		auto it = params.find(key);
 		EXPECT_NE(it, params.end()) << "Can't find the " << key << " param";
@@ -21,4 +41,32 @@ TEST(TestRequest, ParseQuery)
 
 	fnCheckParam("param1", "23");
 	fnCheckParam("param2", "12");
+}
+
+TEST(TestRequest, GetParams)
+{
+	std::unique_ptr<RequestImplMock> pRequestMock = std::make_unique<RequestImplMock>();
+	EXPECT_CALL(*pRequestMock, Perform("https://sub.test.com/path/test/?param1=123"))
+		.WillRepeatedly(Return(Response{ 200, "test", "" }));
+
+	Request data("https://sub.test.com/path/test/", RequestType::Get, std::move(pRequestMock));
+	data.Get()["param1"] = "123";
+	const Response response = data.Perform();
+	EXPECT_TRUE(response);
+	EXPECT_EQ(response.m_Data, "test");
+}
+
+TEST(TestRequest, PostParams)
+{
+	std::unique_ptr<RequestImplMock> pRequestMock = std::make_unique<RequestImplMock>();
+	EXPECT_CALL(*pRequestMock, SetPostParams("param2=456")).Times(1);
+	EXPECT_CALL(*pRequestMock, Perform("https://sub.test.com/path/test/?param1=123"))
+		.WillRepeatedly(Return(Response{ 200, "test", "" }));
+
+	Request data("https://sub.test.com/path/test/", RequestType::Post, std::move(pRequestMock));
+	data.Get()["param1"] = "123";
+	data.Post()["param2"] = "456";
+	const Response response = data.Perform();
+	EXPECT_TRUE(response);
+	EXPECT_EQ(response.m_Data, "test");
 }

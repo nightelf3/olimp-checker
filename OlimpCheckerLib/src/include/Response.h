@@ -1,13 +1,12 @@
 #pragma once
 
-#include <curl/curl.h>
 #include <string>
 
 struct Response
 {
-	CURLcode m_Code = CURLE_OK;
+	int m_Code = -1;
 	std::string m_Data;
+	std::string m_Error;
 
-	operator bool() const { return CURLE_OK == m_Code; }
-	std::string GetError() const;
+	operator bool() const { return 200 == m_Code; }
 };

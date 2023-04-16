@@ -12,13 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Request.cpp" />
-    <ClCompile Include="src\RequestData.cpp" />
-    <ClCompile Include="src\Response.cpp" />
     <ClCompile Include="src\Types.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\include\IRequestImpl.h" />
     <ClInclude Include="src\include\Request.h" />
-    <ClInclude Include="src\include\RequestData.h" />
     <ClInclude Include="src\include\Response.h" />
     <ClInclude Include="src\include\Types.h" />
   </ItemGroup>

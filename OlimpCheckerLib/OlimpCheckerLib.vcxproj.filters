@@ -11,16 +11,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Request.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Types.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Response.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\RequestData.cpp">
+    <ClCompile Include="src\Request.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -28,13 +22,13 @@
     <ClInclude Include="src\include\Types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\include\Request.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\include\Response.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\include\RequestData.h">
+    <ClInclude Include="src\include\Request.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\IRequestImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
