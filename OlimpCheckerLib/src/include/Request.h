@@ -1,12 +1,10 @@
 #pragma once
 
-#include "DllExport.h"
-
 #include "Types.h"
 #include "RequestData.h"
 #include "Response.h"
 
-class DLL_EXPORT Request
+class Request
 {
 public:
 	Request() = default;

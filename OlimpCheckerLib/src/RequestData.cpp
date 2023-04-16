@@ -59,7 +59,3 @@ std::string RequestData::ParamsToString() const
 
 	return result;
 }
-
-void ParseParams(std::csub_match& params)
-{
-}

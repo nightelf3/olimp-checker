@@ -1,7 +1,5 @@
 #pragma once
 
-#include "DllExport.h"
-
 #include <string_view>
 #include <unordered_map>
 
@@ -13,7 +11,7 @@ enum class RequestType
 
 using RequestParams = std::unordered_map<std::string, std::string>;
 
-class DLL_EXPORT RequestData
+class RequestData
 {
 public:
 	RequestData(const char* url, RequestType type = RequestType::Get);
@@ -26,8 +24,6 @@ public:
 	std::string ParamsToString() const;
 
 private:
-	void ParseParams(std::string_view strParams);
-
 	const char* m_Url = "";
 	std::string_view m_Server;
 	std::string_view m_Path;

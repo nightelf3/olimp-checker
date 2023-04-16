@@ -1,11 +1,9 @@
 #pragma once
 
-#include "DllExport.h"
-
 #include <curl/curl.h>
 #include <string>
 
-struct DLL_EXPORT Response
+struct Response
 {
 	CURLcode m_Code = CURLE_OK;
 	std::string m_Data;
