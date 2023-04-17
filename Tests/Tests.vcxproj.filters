@@ -17,5 +17,8 @@
     <ClInclude Include="Mocks\RequestImplMock.h">
       <Filter>Mocks</Filter>
     </ClInclude>
+    <ClInclude Include="Mocks\ConfigImplMock.h">
+      <Filter>Mocks</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

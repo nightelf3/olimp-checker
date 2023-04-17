@@ -11,14 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\Request.cpp" />
-    <ClCompile Include="src\Types.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\include\IRequestImpl.h" />
+    <ClInclude Include="src\include\Config.h" />
+    <ClInclude Include="src\include\Interfaces\IConfigImpl.h" />
+    <ClInclude Include="src\include\Interfaces\IRequestImpl.h" />
     <ClInclude Include="src\include\Request.h" />
     <ClInclude Include="src\include\Response.h" />
-    <ClInclude Include="src\include\Types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -125,5 +129,12 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\JsonCpp.Windows.1.9.2\build\JsonCpp.Windows.targets" Condition="Exists('..\packages\JsonCpp.Windows.1.9.2\build\JsonCpp.Windows.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\JsonCpp.Windows.1.9.2\build\JsonCpp.Windows.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JsonCpp.Windows.1.9.2\build\JsonCpp.Windows.targets'))" />
+  </Target>
 </Project>
