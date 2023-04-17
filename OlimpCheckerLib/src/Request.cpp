@@ -12,14 +12,13 @@ namespace
 		void SetPostParams(std::string params) override
 		{
 			m_PostParams = std::move(params);
+			curl_easy_setopt(m_Curl.get(), CURLOPT_POST, 1);
 			curl_easy_setopt(m_Curl.get(), CURLOPT_POSTFIELDS, m_PostParams.c_str());
 		}
 
 		Response Perform(const std::string& url) override
 		{
 			curl_easy_setopt(m_Curl.get(), CURLOPT_URL, url.c_str());
-			if (!m_PostParams.empty())
-				curl_easy_setopt(m_Curl.get(), CURLOPT_POSTFIELDS, m_PostParams.c_str());
 			curl_easy_setopt(m_Curl.get(), CURLOPT_SSL_VERIFYPEER, 0L);
 
 			Response response;
