@@ -1,7 +1,7 @@
+#include "stdafx.h"
 #include "include/Config.h"
 
 #include <json/json.h>
-#include <iostream>
 #include <fstream>
 
 namespace

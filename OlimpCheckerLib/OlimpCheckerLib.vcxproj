@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\Request.cpp" />
+    <ClCompile Include="src\Response.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\include\Config.h" />
@@ -20,6 +21,7 @@
     <ClInclude Include="src\include\Interfaces\IRequestImpl.h" />
     <ClInclude Include="src\include\Request.h" />
     <ClInclude Include="src\include\Response.h" />
+    <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -79,6 +81,8 @@
       <WarningVersion>
       </WarningVersion>
       <DisableSpecificWarnings>4251;26812</DisableSpecificWarnings>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,6 +112,8 @@
       <WarningVersion>
       </WarningVersion>
       <DisableSpecificWarnings>4251;26812</DisableSpecificWarnings>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

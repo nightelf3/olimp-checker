@@ -1,9 +1,8 @@
+#include "stdafx.h"
 #include "include/Request.h"
 
 #include <regex>
-#include <string>
 #include <curl/curl.h>
-#include <memory>
 
 namespace
 {

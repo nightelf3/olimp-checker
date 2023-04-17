@@ -1,6 +1,5 @@
+#include "stdafx.h"
 #include "include/Response.h"
-#include <cassert>
-#include <iostream>
 #include "json/json.h"
 
 Json::Value Response::ToJson() const
