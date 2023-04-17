@@ -14,7 +14,9 @@ public:
 
 	bool Initialize();
 	bool Register();
+	bool Logout();
 
 private:
 	Config m_Configs;
+	bool m_bRegistered = false;
 };

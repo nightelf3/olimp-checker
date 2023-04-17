@@ -14,6 +14,7 @@ Application::Application()
 
 Application::~Application()
 {
+	Logout();
 	curl_global_cleanup();
 }
 
@@ -61,5 +62,27 @@ bool Application::Register()
 	}
 
 	m_Configs.Set("checkertoken", json["checkertoken"].asString());
+	m_bRegistered = true;
+	return true;
+}
+
+bool Application::Logout()
+{
+	// do not logout if we are not registered
+	if (!m_bRegistered)
+		return true;
+
+	Request request{ m_Configs["api"] + "/logout", RequestType::Post };
+	request.Post()["checkername"] = m_Configs["checkername"];
+	request.Post()["checkertoken"] = m_Configs["checkertoken"];
+
+	const Response response = request.Perform();
+	if (!response)
+	{
+		std::cerr << "ERROR: Logout request failed with the following error: " << response.m_Error << std::endl;
+		return false;
+	}
+
+	m_bRegistered = false;
 	return true;
 }
