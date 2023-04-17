@@ -2,6 +2,8 @@
 
 #include "include/Config.h"
 
+namespace Json { class Value; }
+
 class Application
 {
 public:
@@ -14,9 +16,11 @@ public:
 
 	bool Initialize();
 	bool Register();
+	void Run();
 	bool Logout();
 
 private:
+	void PerformTask(const Json::Value& task);
 	Config m_Configs;
 	bool m_bRegistered = false;
 };

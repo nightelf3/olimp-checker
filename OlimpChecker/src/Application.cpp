@@ -1,10 +1,19 @@
 #include "include/Application.h"
+#include "include/Request.h"
 
+// system libs
 #include <curl/curl.h>
 #include <locale>
 
 #include <iostream>
-#include "include/Request.h"
+#include <chrono>
+#include <conio.h>
+#include <thread>
+
+namespace
+{
+	constexpr std::chrono::milliseconds kSleepInterval = std::chrono::milliseconds{1000};
+}
 
 Application::Application()
 {
@@ -66,6 +75,55 @@ bool Application::Register()
 	return true;
 }
 
+void Application::Run()
+{
+	assert(m_bRegistered && "Running messages without registering");
+
+	int idleCount = 0;
+	do
+	{
+		Request request{ m_Configs["api"] + "/message", RequestType::Post };
+		request.Post()["checkername"] = m_Configs["checkername"];
+		request.Post()["checkertoken"] = m_Configs["checkertoken"];
+		request.Post()["limit"] = "1"; //TODO: change to count of cores?
+		if (const Response response = request.Perform())
+		{
+			const Json::Value json = response.ToJson();
+			const std::string message = json.get("message", "idle").asString();
+			if (message == "idle")
+			{
+				// do nothing, only output
+				constexpr int kNumDots = 4;
+				idleCount = (idleCount + 1) % kNumDots;
+				std::cout << "\rIdle";
+				for (int i = 0; i < kNumDots; i++)
+					std::cout << (i < idleCount ? "." : " ");
+			}
+			else if (message == "logout")
+			{
+				std::cout << std::endl << "Logout message has bees received" << std::endl;
+				return;
+			}
+			else if (message == "task")
+			{
+				std::cout << std::endl << "Task message has bees received" << std::endl;
+				PerformTask(json);
+			}
+			else
+			{
+				std::cerr << "WARNING: unknown message type: " << message << std::endl;
+			}
+		}
+		else
+		{
+			std::cerr << "WARNING: Message request failed" << std::endl;
+		}
+
+		// sleep for 1s
+		std::this_thread::sleep_for(kSleepInterval);
+	} while (!_kbhit() || _getch() != 27);
+}
+
 bool Application::Logout()
 {
 	// do not logout if we are not registered
@@ -85,4 +143,9 @@ bool Application::Logout()
 
 	m_bRegistered = false;
 	return true;
+}
+
+void Application::PerformTask(const Json::Value& task)
+{
+	//TODO: get settings, code and run the task
 }
