@@ -1,16 +1,9 @@
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 
-#include "include/IRequestImpl.h"
 #include "include/Request.h"
+#include "Mocks/RequestImplMock.h"
 
 using namespace ::testing;
-
-struct RequestImplMock : public IRequestImpl
-{
-	MOCK_METHOD(void, SetPostParams, (std::string params), (override));
-	MOCK_METHOD(Response, Perform, (const std::string& url), (override));
-};
 
 TEST(TestRequest, ParseEmptyUrl)
 {
@@ -46,7 +39,7 @@ TEST(TestRequest, ParseGetParams)
 TEST(TestRequest, GetParams)
 {
 	std::unique_ptr<RequestImplMock> pRequestMock = std::make_unique<RequestImplMock>();
-	EXPECT_CALL(*pRequestMock, Perform("https://sub.test.com/path/test/?param1=123"))
+	EXPECT_CALL(*pRequestMock, Perform(StrEq("https://sub.test.com/path/test/?param1=123")))
 		.WillRepeatedly(Return(Response{ 200, "test", "" }));
 
 	Request data("https://sub.test.com/path/test/", RequestType::Get, std::move(pRequestMock));
@@ -59,8 +52,8 @@ TEST(TestRequest, GetParams)
 TEST(TestRequest, PostParams)
 {
 	std::unique_ptr<RequestImplMock> pRequestMock = std::make_unique<RequestImplMock>();
-	EXPECT_CALL(*pRequestMock, SetPostParams("param2=456")).Times(1);
-	EXPECT_CALL(*pRequestMock, Perform("https://sub.test.com/path/test/?param1=123"))
+	EXPECT_CALL(*pRequestMock, SetPostParams(StrEq("param2=456"))).Times(1);
+	EXPECT_CALL(*pRequestMock, Perform(StrEq("https://sub.test.com/path/test/?param1=123")))
 		.WillRepeatedly(Return(Response{ 200, "test", "" }));
 
 	Request data("https://sub.test.com/path/test/", RequestType::Post, std::move(pRequestMock));

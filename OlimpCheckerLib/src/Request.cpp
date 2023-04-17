@@ -1,8 +1,9 @@
 #include "include/Request.h"
-#include "include/Types.h"
 
 #include <regex>
 #include <string>
+#include <curl/curl.h>
+#include <memory>
 
 namespace
 {
@@ -49,7 +50,15 @@ namespace
 			return 0;
 		}
 
-		upCURL m_Curl = make_upCURL();
+		struct CUrlDeleter
+		{
+			void operator()(CURL* curl)
+			{
+				if (curl)
+					curl_easy_cleanup(curl);
+			}
+		};
+		std::unique_ptr<CURL, CUrlDeleter> m_Curl{ curl_easy_init() };
 		std::string m_PostParams;
 	};
 }
