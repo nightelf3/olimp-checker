@@ -33,6 +33,11 @@ namespace
 			return m_Value[key].isNull() ? std::optional<std::string>{} : m_Value[key].asString();
 		}
 
+		void Set(const char* key, std::string value) override
+		{
+			m_Value[key] = std::move(value);
+		}
+
 	private:
 		Json::Value m_Value;
 	};
@@ -82,4 +87,14 @@ std::string Config::operator[](const char* key) const
 std::string Config::operator[](const std::string& key) const
 {
 	return operator[](key.c_str());
+}
+
+void Config::Set(const char* key, std::string val)
+{
+	m_Impl->Set(key, std::move(val));
+}
+
+void Config::Set(const std::string& key, std::string val)
+{
+	Set(key.c_str(), std::move(val));
 }

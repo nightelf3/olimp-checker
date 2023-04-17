@@ -8,4 +8,5 @@ struct IConfigImpl
 	virtual ~IConfigImpl() = default;
 	virtual bool Read(const std::string& path) = 0;
 	virtual std::optional<std::string> Get(const char* key) const = 0;
+	virtual void Set(const char* key, std::string value) = 0;
 };

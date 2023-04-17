@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "json/value.h"
 
 struct Response
 {
@@ -9,4 +10,5 @@ struct Response
 	std::string m_Error;
 
 	operator bool() const { return 200 == m_Code; }
+	Json::Value ToJson() const;
 };

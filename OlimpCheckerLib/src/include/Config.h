@@ -18,6 +18,9 @@ public:
 	std::string operator[](const char* key) const;
 	std::string operator[](const std::string& key) const;
 
+	void Set(const char* key, std::string val);
+	void Set(const std::string& key, std::string val);
+
 private:
 	std::unique_ptr<IConfigImpl> m_Impl;
 };
