@@ -1,5 +1,6 @@
 #include "include/Application.h"
 #include "include/Request.h"
+#include "include/TaskPerformer.h"
 
 // system libs
 #include <curl/curl.h>
@@ -79,7 +80,16 @@ void Application::Run()
 {
 	assert(m_bRegistered && "Running messages without registering");
 
-	int idleCount = 0;
+	int dotsCount = 0;
+	auto fnPrintDots = [&dotsCount]()
+	{
+		// do nothing, only output
+		constexpr int kNumDots = 4;
+		dotsCount = (dotsCount + 1) % kNumDots;
+		for (int i = 0; i < kNumDots; i++)
+			std::cout << (i < dotsCount ? "." : " ");
+	};
+
 	do
 	{
 		Request request{ m_Configs["api"] + "/message", RequestType::Post };
@@ -93,11 +103,14 @@ void Application::Run()
 			if (message == "idle")
 			{
 				// do nothing, only output
-				constexpr int kNumDots = 4;
-				idleCount = (idleCount + 1) % kNumDots;
 				std::cout << "\rIdle";
-				for (int i = 0; i < kNumDots; i++)
-					std::cout << (i < idleCount ? "." : " ");
+				fnPrintDots();
+			}
+			else if (message == "authentification")
+			{
+				// do nothing, only output
+				std::cout << "\rAuthentification";
+				fnPrintDots();
 			}
 			else if (message == "logout")
 			{
@@ -107,7 +120,7 @@ void Application::Run()
 			else if (message == "task")
 			{
 				std::cout << std::endl << "Task message has bees received" << std::endl;
-				PerformTask(json);
+				PerformTasks(json.get("tasks", {}));
 			}
 			else
 			{
@@ -145,7 +158,7 @@ bool Application::Logout()
 	return true;
 }
 
-void Application::PerformTask(const Json::Value& task)
+void Application::PerformTasks(const Json::Value& tasks)
 {
 	//TODO: get settings, code and run the task
 }

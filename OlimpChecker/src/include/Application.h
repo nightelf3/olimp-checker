@@ -20,7 +20,8 @@ public:
 	bool Logout();
 
 private:
-	void PerformTask(const Json::Value& task);
+	void PerformTasks(const Json::Value& task);
+
 	Config m_Configs;
 	bool m_bRegistered = false;
 };
