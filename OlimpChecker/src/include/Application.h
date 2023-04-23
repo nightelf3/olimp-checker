@@ -1,6 +1,7 @@
 #pragma once
 
 #include "include/Config.h"
+#include "include/Request.h"
 
 namespace Json { class Value; }
 
@@ -20,6 +21,7 @@ public:
 	bool Logout();
 
 private:
+	Request MakeRequestWithCredentials(std::string path) const;
 	void PerformTasks(const Json::Value& task);
 
 	Config m_Configs;

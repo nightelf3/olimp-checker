@@ -81,22 +81,21 @@ void Application::Run()
 	assert(m_bRegistered && "Running messages without registering");
 
 	int dotsCount = 0;
-	auto fnPrintDots = [&dotsCount]()
+	bool dotsPrinted = false;
+	auto fnPrintDots = [&dotsCount, &dotsPrinted]()
 	{
 		// do nothing, only output
 		constexpr int kNumDots = 4;
 		dotsCount = (dotsCount + 1) % kNumDots;
 		for (int i = 0; i < kNumDots; i++)
 			std::cout << (i < dotsCount ? "." : " ");
+		dotsPrinted = true;
 	};
 
 	do
 	{
-		Request request{ m_Configs["api"] + "/message", RequestType::Post };
-		request.Post()["checkername"] = m_Configs["checkername"];
-		request.Post()["checkertoken"] = m_Configs["checkertoken"];
-		request.Post()["limit"] = "1"; //TODO: change to count of cores?
-		if (const Response response = request.Perform())
+		//TODO: use 'limit' to get more tasks, default: 1
+		if (const Response response = MakeRequestWithCredentials("/message").Perform())
 		{
 			const Json::Value json = response.ToJson();
 			const std::string message = json.get("message", "idle").asString();
@@ -112,19 +111,28 @@ void Application::Run()
 				std::cout << "\rAuthentification";
 				fnPrintDots();
 			}
-			else if (message == "logout")
-			{
-				std::cout << std::endl << "Logout message has bees received" << std::endl;
-				return;
-			}
-			else if (message == "task")
-			{
-				std::cout << std::endl << "Task message has bees received" << std::endl;
-				PerformTasks(json.get("tasks", {}));
-			}
 			else
 			{
-				std::cerr << "WARNING: unknown message type: " << message << std::endl;
+				if (dotsPrinted)
+				{
+					dotsPrinted = false;
+					std::cout << std::endl;
+				}
+
+				if (message == "logout")
+				{
+					std::cout << "Logout message has been received" << std::endl;
+					return;
+				}
+				else if (message == "task")
+				{
+					std::cout << "Task message has been received" << std::endl;
+					PerformTasks(json.get("tasks", {}));
+				}
+				else
+				{
+					std::cerr << "WARNING: unknown message type: " << message << std::endl;
+				}
 			}
 		}
 		else
@@ -143,11 +151,7 @@ bool Application::Logout()
 	if (!m_bRegistered)
 		return true;
 
-	Request request{ m_Configs["api"] + "/logout", RequestType::Post };
-	request.Post()["checkername"] = m_Configs["checkername"];
-	request.Post()["checkertoken"] = m_Configs["checkertoken"];
-
-	const Response response = request.Perform();
+	const Response response = MakeRequestWithCredentials("/logout").Perform();
 	if (!response)
 	{
 		std::cerr << "ERROR: Logout request failed with the following error: " << response.m_Error << std::endl;
@@ -158,7 +162,22 @@ bool Application::Logout()
 	return true;
 }
 
+Request Application::MakeRequestWithCredentials(std::string path) const
+{
+	Request request{ m_Configs["api"] + path, RequestType::Post };
+	request.Post()["checkername"] = m_Configs["checkername"];
+	request.Post()["checkertoken"] = m_Configs["checkertoken"];
+	return request;
+}
+
 void Application::PerformTasks(const Json::Value& tasks)
 {
-	//TODO: get settings, code and run the task
+	//TODO: process tasks on different threads
+	const size_t count = tasks.isArray() ? tasks.size() : 0;
+	assert(count > 0 && "Tasks value should not be empty");
+	for (size_t i = 0; i < count; i++)
+	{
+		TaskPerformer task(tasks.get(i, {}));
+		task.Run(MakeRequestWithCredentials("/results"));
+	}
 }

@@ -14,6 +14,7 @@
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\Request.cpp" />
     <ClCompile Include="src\Response.cpp" />
+    <ClCompile Include="src\TaskPerformer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\include\Config.h" />
@@ -21,6 +22,7 @@
     <ClInclude Include="src\include\Interfaces\IRequestImpl.h" />
     <ClInclude Include="src\include\Request.h" />
     <ClInclude Include="src\include\Response.h" />
+    <ClInclude Include="src\include\TaskPerformer.h" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -62,13 +64,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)src;$(SolutionDir)external\curl\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(SolutionDir)external\curl\include;$(SolutionDir)external\tomykaira;$(IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <CustomBuildAfterTargets />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)src;$(SolutionDir)external\curl\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(SolutionDir)external\curl\include;$(SolutionDir)external\tomykaira;$(IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
