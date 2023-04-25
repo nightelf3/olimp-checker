@@ -33,6 +33,7 @@
     <LibraryPath>$(SolutionDir)external\curl\lib\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="TestCompiler.cpp" />
     <ClCompile Include="TestConfig.cpp" />
     <ClCompile Include="TestRequest.cpp" />
   </ItemGroup>
@@ -45,6 +46,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Mocks\CompilerImplMock.h" />
     <ClInclude Include="Mocks\ConfigImplMock.h" />
     <ClInclude Include="Mocks\RequestImplMock.h" />
   </ItemGroup>

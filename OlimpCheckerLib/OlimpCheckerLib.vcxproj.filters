@@ -12,6 +12,12 @@
     <Filter Include="Header Files\Interfaces">
       <UniqueIdentifier>{a0583422-9bad-440b-82ae-ac8393323872}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Compilers">
+      <UniqueIdentifier>{3187df4a-488c-48a4-82e0-9ffeef9470ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Compilers">
+      <UniqueIdentifier>{6688e2e0-3264-40ff-9bd1-9b54bc645e58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Request.cpp">
@@ -25,6 +31,15 @@
     </ClCompile>
     <ClCompile Include="src\TaskPerformer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Compiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Compilers\CppCompilerImpl.cpp">
+      <Filter>Source Files\Compilers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Compilers\BaseCompilerImpl.cpp">
+      <Filter>Source Files\Compilers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +63,18 @@
     </ClInclude>
     <ClInclude Include="src\include\TaskPerformer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\Compiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\Interfaces\ICompilerImpl.h">
+      <Filter>Header Files\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\Compilers\CppCompilerImpl.h">
+      <Filter>Header Files\Compilers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\include\Compilers\BaseCompilerImpl.h">
+      <Filter>Header Files\Compilers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

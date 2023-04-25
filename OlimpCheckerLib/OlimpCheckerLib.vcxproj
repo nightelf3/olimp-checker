@@ -11,17 +11,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Compiler.cpp" />
+    <ClCompile Include="src\Compilers\BaseCompilerImpl.cpp" />
+    <ClCompile Include="src\Compilers\CppCompilerImpl.cpp" />
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\Request.cpp" />
     <ClCompile Include="src\Response.cpp" />
     <ClCompile Include="src\TaskPerformer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\include\Compilers\BaseCompilerImpl.h" />
+    <ClInclude Include="src\include\Compilers\CppCompilerImpl.h" />
     <ClInclude Include="src\include\Config.h" />
+    <ClInclude Include="src\include\Interfaces\ICompilerImpl.h" />
     <ClInclude Include="src\include\Interfaces\IConfigImpl.h" />
     <ClInclude Include="src\include\Interfaces\IRequestImpl.h" />
     <ClInclude Include="src\include\Request.h" />
     <ClInclude Include="src\include\Response.h" />
+    <ClInclude Include="src\include\Compiler.h" />
     <ClInclude Include="src\include\TaskPerformer.h" />
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>

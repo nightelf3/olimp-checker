@@ -4,6 +4,8 @@
     <ClCompile Include="TestRequest.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\gtest\gtest-all.cc" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\gmock\gmock-all.cc" />
+    <ClCompile Include="TestConfig.cpp" />
+    <ClCompile Include="TestCompiler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -18,6 +20,9 @@
       <Filter>Mocks</Filter>
     </ClInclude>
     <ClInclude Include="Mocks\ConfigImplMock.h">
+      <Filter>Mocks</Filter>
+    </ClInclude>
+    <ClInclude Include="Mocks\CompilerImplMock.h">
       <Filter>Mocks</Filter>
     </ClInclude>
   </ItemGroup>
