@@ -6,6 +6,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\gmock\gmock-all.cc" />
     <ClCompile Include="TestConfig.cpp" />
     <ClCompile Include="TestCompiler.cpp" />
+    <ClCompile Include="TestProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

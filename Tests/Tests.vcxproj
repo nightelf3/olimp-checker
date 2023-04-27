@@ -35,6 +35,7 @@
   <ItemGroup>
     <ClCompile Include="TestCompiler.cpp" />
     <ClCompile Include="TestConfig.cpp" />
+    <ClCompile Include="TestProcess.cpp" />
     <ClCompile Include="TestRequest.cpp" />
   </ItemGroup>
   <ItemGroup>
