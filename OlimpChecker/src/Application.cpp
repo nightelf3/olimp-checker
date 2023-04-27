@@ -173,9 +173,9 @@ Request Application::MakeRequestWithCredentials(std::string path) const
 void Application::PerformTasks(const Json::Value& tasks)
 {
 	//TODO: process tasks on different threads
-	const size_t count = tasks.isArray() ? tasks.size() : 0;
+	const Json::ArrayIndex count = tasks.isArray() ? tasks.size() : 0;
 	assert(count > 0 && "Tasks value should not be empty");
-	for (size_t i = 0; i < count; i++)
+	for (Json::ArrayIndex i = 0; i < count; i++)
 	{
 		TaskPerformer task(tasks.get(i, {}));
 		task.Run(MakeRequestWithCredentials("/results"));

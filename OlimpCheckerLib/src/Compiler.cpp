@@ -58,5 +58,4 @@ std::unique_ptr<ICompilerImpl> Compiler::MakeImplFromExtension(const std::string
 		return std::make_unique<CppCompilerImpl>();
 	std::cerr << "Unknown extension: " << extension << std::endl;
 	return {};
-
 }
