@@ -47,6 +47,23 @@ bool Application::Initialize()
 		}
 	}
 
+	const std::vector<std::string> requiredCompilers = {
+		"Compilers/MinGW32/bin/gcc.exe",
+		"Compilers/MinGW32/bin/g++.exe",
+		"Compilers/FPC/bin/i386-win32/fpc.exe",
+		"Compilers/Python36/python.exe",
+		"Compilers/Java/bin/javac.exe",
+		"Compilers/Mono/bin/csc.bat"
+	};
+	for (const std::string& compiler : requiredCompilers)
+	{
+		if (!std::filesystem::exists(std::filesystem::absolute({ compiler })))
+		{
+			std::cerr << "ERROR: missing required compiler: \"" << compiler << "\"" << std::endl;
+			ret = false;
+		}
+	}
+
 	return ret;
 }
 
