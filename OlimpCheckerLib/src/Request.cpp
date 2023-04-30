@@ -11,6 +11,7 @@ namespace
 		void SetPostParams(std::string params) override
 		{
 			m_PostParams = std::move(params);
+			curl_easy_escape(m_Curl.get(), params.c_str(), (int)params.size());
 			curl_easy_setopt(m_Curl.get(), CURLOPT_POST, 1);
 			curl_easy_setopt(m_Curl.get(), CURLOPT_POSTFIELDS, m_PostParams.c_str());
 		}
@@ -121,6 +122,7 @@ std::string Request::ParamsToString(const RequestParams& params) const
 	{
 		// escape & and = in params
 		str = std::regex_replace(str, std::regex("&"), "%26");
+		str = std::regex_replace(str, std::regex("\\+"), "%2B");
 		return std::regex_replace(str, std::regex("="), "%3D");
 	};
 
