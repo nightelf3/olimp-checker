@@ -56,11 +56,12 @@ ProcessResponse Process_win::Run(ProcessData data)
 	ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
 
 	// Create the child process.
-	const std::wstring cmd = data.path.wstring();
+	const std::wstring cmd = std::format(L"{} {}", data.path.wstring(), std::wstring{ data.params.begin(), data.params.end()});
 	const std::wstring dir = data.path.parent_path().wstring();
 	if (!CreateProcess(NULL, const_cast<LPWSTR>(cmd.c_str()), nullptr, nullptr, TRUE,
 		CREATE_NO_WINDOW, nullptr, const_cast<LPWSTR>(dir.c_str()), &si, &pi))
 	{
+		std::cerr << "CreateProcess failed with the following error: " << GetLastError() << std::endl;
 		return response;
 	}
 

@@ -4,11 +4,17 @@
 
 using namespace ::testing;
 
-TEST(TestProcess, ReadOutput)
+TEST(TestProcess, CustomInput)
 {
 	Process process;
-	process.Path({ "C:\\Windows\\System32\\cmd.exe" });
 	process.Input("echo Trololo && exit");
-	EXPECT_TRUE(process.Run());
-	EXPECT_THAT(process.Output(), HasSubstr("Trololo"));
+	EXPECT_TRUE(process.Run({ "C:\\Windows\\System32\\cmd.exe" }));
+	EXPECT_THAT(process.MoveOutput(), HasSubstr("Trololo"));
+}
+
+TEST(TestProcess, CustomParams)
+{
+	Process process;
+	EXPECT_TRUE(process.Run({ "C:\\Windows\\System32\\ping.exe" }, "-n 1 127.0.0.1"));
+	EXPECT_THAT(process.MoveOutput(), HasSubstr("127.0.0.1:"));
 }

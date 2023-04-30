@@ -19,6 +19,7 @@ struct ProcessData
 {
 	std::filesystem::path path;
 	std::string input;
+	std::string params;
 };
 
 struct IProcessImpl

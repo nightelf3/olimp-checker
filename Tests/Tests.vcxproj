@@ -49,6 +49,7 @@
   <ItemGroup>
     <ClInclude Include="Mocks\CompilerImplMock.h" />
     <ClInclude Include="Mocks\ConfigImplMock.h" />
+    <ClInclude Include="Mocks\ProcessImplMock.h" />
     <ClInclude Include="Mocks\RequestImplMock.h" />
   </ItemGroup>
   <ItemDefinitionGroup />
