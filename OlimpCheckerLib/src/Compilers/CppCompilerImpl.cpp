@@ -1,11 +1,12 @@
 #include "stdafx.h"
 
 #include "include/Compilers/CppCompilerImpl.h"
+#include "include/Process.h"
 
-bool CppCompilerImpl::Compile(const std::filesystem::path& srcFile, std::filesystem::path& dstFile, std::string& error)
+std::pair<std::filesystem::path, std::string> CppCompilerImpl::MakeCompilationParams(const std::filesystem::path& srcFile, const std::filesystem::path& dstFile) const
 {
-	error.clear();
-	dstFile = srcFile;
-	dstFile.replace_extension("exe");
-	return true;
+	const std::filesystem::path compiler = { srcFile.extension() == "c" ? "gcc" : "g++" };
+	std::filesystem::path path = std::filesystem::absolute({ "Compilers/MinGW32/bin" }) / compiler;
+	std::string params = std::format("-g -O3 -static \"{}\" -o \"{}\"", srcFile.string(), dstFile.string());
+	return { std::move(path), std::move(params) };
 }

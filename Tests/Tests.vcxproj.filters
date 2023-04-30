@@ -29,5 +29,6 @@
     <ClInclude Include="Mocks\ProcessImplMock.h">
       <Filter>Mocks</Filter>
     </ClInclude>
+    <ClInclude Include="Utils.hpp" />
   </ItemGroup>
 </Project>

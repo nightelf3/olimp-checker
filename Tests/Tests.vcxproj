@@ -51,6 +51,7 @@
     <ClInclude Include="Mocks\ConfigImplMock.h" />
     <ClInclude Include="Mocks\ProcessImplMock.h" />
     <ClInclude Include="Mocks\RequestImplMock.h" />
+    <ClInclude Include="Utils.hpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

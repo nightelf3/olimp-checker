@@ -12,7 +12,7 @@ public:
 
 	bool Run();
 	std::filesystem::path ExecutablePath() const { return m_ExecutablePath; }
-	std::string Error() const { return m_Error; }
+	const std::string& Error() const { return m_Error; }
 
 	static std::unique_ptr<ICompilerImpl> MakeImplFromExtension(const std::string& extension);
 	static std::filesystem::path MakeFilePath(const std::string& username, const std::string& taskname, int queueId, const std::string& extension);

@@ -33,7 +33,7 @@ TaskPerformer::TaskPerformer(const Json::Value& task)
 	if (const std::string error = macaron::Base64::Decode(task.get("text", "").asString(), text); error.empty())
 	{
 		const std::string extension = task.get("extension", "").asString();
-		std::filesystem::path path = Compiler::MakeFilePath(task.get("username", "").asString(), task.get("task_name", "").asString(), m_QueueId, extension);
+		std::filesystem::path path = Compiler::MakeFilePath(task.get("username", "").asString(), task.get("task_id", "").asString(), m_QueueId, extension);
 		m_Compiler = std::make_unique<Compiler>(std::move(text), std::move(path), Compiler::MakeImplFromExtension(extension));
 	}
 }

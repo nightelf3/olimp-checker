@@ -8,7 +8,7 @@
 
 Compiler::Compiler(std::string text, std::filesystem::path path, std::unique_ptr<ICompilerImpl> pImpl)
 	: m_Text(std::move(text)),
-		m_FilePath(std::move(path)),
+		m_FilePath(std::filesystem::absolute(std::move(path))),
 		m_pImpl(std::move(pImpl))
 {
 }
@@ -29,7 +29,7 @@ bool Compiler::Run()
 			return false;
 
 		// run the compilation
-		if (!m_pImpl->Compile(m_FilePath, m_ExecutablePath, m_Error))
+		if (!m_pImpl->Compile(m_FilePath, m_ExecutablePath, m_Error) || !m_Error.empty())
 			return false;
 	}
 	catch (const std::exception& ex)
