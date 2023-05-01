@@ -7,6 +7,6 @@ std::pair<std::filesystem::path, std::string> CppCompilerImpl::MakeCompilationPa
 {
 	const std::filesystem::path compiler = { srcFile.extension() == "c" ? "gcc" : "g++" };
 	std::filesystem::path path = std::filesystem::absolute({ "Compilers/MinGW32/bin" }) / compiler;
-	std::string params = std::format("-g -O3 -static \"{}\" -o \"{}\"", srcFile.string(), dstFile.string());
+	std::string params = std::format("-O3 -static -DNDEBUG \"{}\" -o \"{}\"", srcFile.string(), dstFile.string());
 	return { std::move(path), std::move(params) };
 }
