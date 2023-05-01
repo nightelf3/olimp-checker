@@ -75,6 +75,7 @@ ProcessResponse Process_win::Run(ProcessData data)
 	// start the thread
 	ResumeThread(pi.hThread);
 
+	bool bCheckOtherErrors = true;
 	switch (WaitForSingleObject(pi.hProcess, (DWORD)data.timeLimit.value_or(INFINITE)))
 	{
 	case WAIT_OBJECT_0:
@@ -86,24 +87,40 @@ ProcessResponse Process_win::Run(ProcessData data)
 		break;
 
 	default:
+		bCheckOtherErrors = false;
 		response.code = ProcessCode::Failed;
 		break;
-	}
-
-	// check the memory limit
-	if (data.memoryLimit)
-	{
-		JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobExtLimit;
-		ZeroMemory(&jobExtLimit, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
-		QueryInformationJobObject(hJobObject, JobObjectExtendedLimitInformation, &jobExtLimit, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION), nullptr);
-
-		if ((jobExtLimit.PeakProcessMemoryUsed >> 20) > *data.memoryLimit)
-			response.code = ProcessCode::MemoryLimit;
 	}
 
 	// read the output only on success
 	if (ProcessCode::Success == response.code)
 		response.output = ReadFromPipe(hPipeOutRead);
+
+	if (bCheckOtherErrors)
+	{
+		// check memory limit
+		if (data.memoryLimit)
+		{
+			JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobExtLimit;
+			ZeroMemory(&jobExtLimit, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+			QueryInformationJobObject(hJobObject, JobObjectExtendedLimitInformation, &jobExtLimit, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION), nullptr);
+
+			if ((jobExtLimit.PeakProcessMemoryUsed >> 20) > *data.memoryLimit)
+			{
+				response.code = ProcessCode::MemoryLimit;
+				bCheckOtherErrors = false;
+			}
+		}
+
+		// check exit code to make sure no runtime errors
+		if (bCheckOtherErrors)
+		{
+			DWORD exitCode = 0;
+			GetExitCodeProcess(pi.hProcess, &exitCode);
+			if (exitCode != 0 && exitCode != STATUS_PENDING)
+				response.code = ProcessCode::RuntimeError;
+		}
+	}
 
 	CloseHandle(hPipeInWrite);
 	CloseHandle(hPipeOutRead);

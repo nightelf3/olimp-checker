@@ -48,6 +48,18 @@ TEST(TestProcess, MemoryLimit)
 	EXPECT_EQ(process.Code(), ProcessCode::MemoryLimit);
 }
 
+TEST(TestProcess, RuntimeError)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RuntimeError.cpp";
+	std::string code = "int main() { throw 0; return 0; }";
+	const FileGuard exePath = CompileCode(std::move(code), srcPath);
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	EXPECT_FALSE(process.Run(exePath));
+	EXPECT_EQ(process.Code(), ProcessCode::RuntimeError);
+}
+
 TEST(TestProcess, BandwidthLimit)
 {
 	//TODO: add with Python

@@ -8,6 +8,7 @@ enum class ProcessCode
 	Success = 0,
 	TimeLimit,
 	MemoryLimit,
+	RuntimeError,
 	Failed
 };
 
