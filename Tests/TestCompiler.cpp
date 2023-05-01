@@ -1,21 +1,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h" // for EXPECT_THAT
 
-#include "Utils.hpp"
 #include "Mocks/CompilerImplMock.h"
-#include "include/Compiler.h"
+#include "Utils.hpp"
 
 #include <fstream>
 
 using namespace ::testing;
-
-namespace
-{
-	constexpr std::string_view kCCode = "int main() { return 0; }";
-	constexpr std::string_view kCInvalidCode = "int main() { retrn 0; }";
-	constexpr std::string_view kCppCode = "int main() { return 0; }";
-	constexpr std::string_view kCppInvalidCode = "int man() { return 0; }";
-}
 
 TEST(TestCompiler, MakeImplFromExtension)
 {
@@ -30,7 +21,7 @@ TEST(TestCompiler, MakeImplFromExtension)
 TEST(TestCompiler, EmptyImpl)
 {
 	const std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "EmptyImpl.cpp";
-	Compiler compiler(std::string{ kCppCode }, tempFile, nullptr);
+	Compiler compiler({}, tempFile, nullptr);
 	EXPECT_FALSE(compiler.Run());
 }
 
@@ -41,7 +32,7 @@ TEST(TestCompiler, PathCreation)
 	std::unique_ptr<CompilerImplMock> pCompilerMock = std::make_unique<CompilerImplMock>();
 	EXPECT_CALL(*pCompilerMock, CreatePath(_)).WillRepeatedly(Return(false));
 
-	Compiler compiler(std::string{ kCppCode }, tmpFilePath, std::move(pCompilerMock));
+	Compiler compiler({}, tmpFilePath, std::move(pCompilerMock));
 	EXPECT_FALSE(compiler.Run());
 }
 
@@ -53,7 +44,7 @@ TEST(TestCompiler, FileCreation)
 	EXPECT_CALL(*pCompilerMock, CreatePath(_)).WillRepeatedly(Return(true));
 	EXPECT_CALL(*pCompilerMock, CreateFile(_, _)).WillRepeatedly(Return(false));
 
-	Compiler compiler(std::string{ kCppCode }, tmpFilePath, std::move(pCompilerMock));
+	Compiler compiler({}, tmpFilePath, std::move(pCompilerMock));
 	EXPECT_FALSE(compiler.Run());
 }
 
@@ -69,54 +60,46 @@ TEST(TestCompiler, ExceptionHandling)
 		return false;
 	});
 
-	Compiler compiler(std::string{ kCppCode }, tmpFilePath, std::move(pCompilerMock));
+	Compiler compiler({}, tmpFilePath, std::move(pCompilerMock));
 	EXPECT_FALSE(compiler.Run());
 }
 
 TEST(TestCompiler, RunCCompilation)
 {
-	const std::filesystem::path tmpFilePath = std::filesystem::temp_directory_path() / "RunCCompilation.c";
-	Compiler compiler(std::string{ kCCode }, tmpFilePath, Compiler::MakeImplFromExtension("c"));
-
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RunCCompilation.c";
+	std::string code = "int main() { return 0; }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
 	EXPECT_TRUE(compiler.Run());
-	const FileGuard srcGuard{ tmpFilePath };
-	const FileGuard exeGuard{ compiler.ExecutablePath() };
-
+	const FileGuard exePath = compiler.ExecutablePath();
 	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
 }
 
 TEST(TestCompiler, FailCCompilation)
 {
-	const std::filesystem::path tmpFilePath = std::filesystem::temp_directory_path() / "FailCCompilation.c";
-	Compiler compiler(std::string{ kCInvalidCode }, tmpFilePath, Compiler::MakeImplFromExtension("c"));
-
-	EXPECT_TRUE(compiler.Run());
-	const FileGuard srcGuard{ tmpFilePath };
-	const FileGuard exeGuard{ compiler.ExecutablePath() };
-
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "FailCCompilation.c";
+	std::string code = "int main() { retrn 0; }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_FALSE(compiler.Run());
+	const FileGuard exePath = compiler.ExecutablePath();
 	EXPECT_THAT(compiler.Error(), HasSubstr("'retrn' was not declared in this scope"));
 }
 
 TEST(TestCompiler, RunCppCompilation)
 {
-	const std::filesystem::path tmpFilePath = std::filesystem::temp_directory_path() / "RunCppCompilation.cpp";
-	Compiler compiler(std::string{ kCppCode }, tmpFilePath, Compiler::MakeImplFromExtension("cpp"));
-
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RunCppCompilation.cpp";
+	std::string code = "int main() { return 0; }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
 	EXPECT_TRUE(compiler.Run());
-	const FileGuard srcGuard{ tmpFilePath };
-	const FileGuard exeGuard{ compiler.ExecutablePath() };
-
+	const FileGuard exePath = compiler.ExecutablePath();
 	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
 }
 
 TEST(TestCompiler, FailCppCompilation)
 {
-	const std::filesystem::path tmpFilePath = std::filesystem::temp_directory_path() / "FailCppCompilation.cpp";
-	Compiler compiler(std::string{ kCppInvalidCode }, tmpFilePath, Compiler::MakeImplFromExtension("cpp"));
-
-	EXPECT_TRUE(compiler.Run());
-	const FileGuard srcGuard{ tmpFilePath };
-	const FileGuard exeGuard{ compiler.ExecutablePath() };
-
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "FailCppCompilation.c";
+	std::string code = "int man() { return 0; }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_FALSE(compiler.Run());
+	const FileGuard exePath = compiler.ExecutablePath();
 	EXPECT_THAT(compiler.Error(), HasSubstr("undefined reference to"));
 }

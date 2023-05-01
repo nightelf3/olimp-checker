@@ -6,6 +6,8 @@
 enum class ProcessCode
 {
 	Success = 0,
+	TimeLimit,
+	MemoryLimit,
 	Failed
 };
 
@@ -18,8 +20,11 @@ struct ProcessResponse
 struct ProcessData
 {
 	std::filesystem::path path;
-	std::string input;
 	std::string params;
+	std::string input;
+	std::optional<size_t> memoryLimit;
+	std::optional<size_t> timeLimit;
+	std::optional<size_t> bandwithLimit;
 };
 
 struct IProcessImpl

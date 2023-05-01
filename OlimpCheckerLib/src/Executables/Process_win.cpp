@@ -4,30 +4,15 @@
 #include <array>
 #include <Windows.h>
 
-namespace
-{
-	struct HandlerDeleter
-	{
-		void operator()(PHANDLE handler)
-		{
-			if (!handler)
-				return;
-			CloseHandle(*handler);
-			delete handler;
-		}
-	};
-	using upHandler = std::unique_ptr<HANDLE, HandlerDeleter>;
-}
-
 class Process_win : public IProcessImpl
 {
 public:
 	ProcessResponse Run(ProcessData data) override;
 
 private:
-	std::pair<upHandler, upHandler> MakeInOutPipe(bool out) const;
-	void WriteToPipe(upHandler hPipe, std::string data);
-	std::string ReadFromPipe(upHandler hPipe);
+	std::pair<HANDLE, HANDLE> MakeInOutPipe(bool out) const;
+	void WriteToPipe(HANDLE hPipe, std::string data);
+	std::string ReadFromPipe(HANDLE hPipe);
 };
 
 ProcessResponse Process_win::Run(ProcessData data)
@@ -41,14 +26,24 @@ ProcessResponse Process_win::Run(ProcessData data)
 	if (!hPipeOutRead || !hPipeOutWrite || !hPipeInRead || !hPipeInWrite)
 		return response;
 
+	HANDLE hJobObject = CreateJobObject(nullptr, nullptr);
+	if (data.bandwithLimit)
+	{
+		JOBOBJECT_NET_RATE_CONTROL_INFORMATION jobNetLimit;
+		ZeroMemory(&jobNetLimit, sizeof(JOBOBJECT_NET_RATE_CONTROL_INFORMATION));
+		jobNetLimit.ControlFlags = JOB_OBJECT_NET_RATE_CONTROL_ENABLE | JOB_OBJECT_NET_RATE_CONTROL_MAX_BANDWIDTH;
+		jobNetLimit.MaxBandwidth = *data.bandwithLimit;
+		SetInformationJobObject(hJobObject, JobObjectNetRateControlInformation, &jobNetLimit, sizeof(JOBOBJECT_NET_RATE_CONTROL_INFORMATION));
+	}
+
 	// Set up members of the STARTUPINFO structure.
 	// This structure specifies the STDIN and STDOUT handles for redirection.
 	STARTUPINFO si;
 	ZeroMemory(&si, sizeof(STARTUPINFO));
 	si.cb = sizeof(STARTUPINFO);
-	si.hStdError = *hPipeOutWrite;
-	si.hStdOutput = *hPipeOutWrite;
-	si.hStdInput = *hPipeInRead;
+	si.hStdError = hPipeOutWrite;
+	si.hStdOutput = hPipeOutWrite;
+	si.hStdInput = hPipeInRead;
 	si.dwFlags = STARTF_USESTDHANDLES;
 
 	// Set up members of the PROCESS_INFORMATION structure.
@@ -58,36 +53,70 @@ ProcessResponse Process_win::Run(ProcessData data)
 	// Create the child process.
 	const std::wstring cmd = std::format(L"{} {}", data.path.wstring(), std::wstring{ data.params.begin(), data.params.end()});
 	const std::wstring dir = data.path.parent_path().wstring();
-	if (!CreateProcess(NULL, const_cast<LPWSTR>(cmd.c_str()), nullptr, nullptr, TRUE,
-		CREATE_NO_WINDOW, nullptr, const_cast<LPWSTR>(dir.c_str()), &si, &pi))
+	if (!CreateProcess(nullptr, const_cast<LPWSTR>(cmd.c_str()), nullptr, nullptr, TRUE,
+		CREATE_UNICODE_ENVIRONMENT | CREATE_SUSPENDED, nullptr, const_cast<LPWSTR>(dir.c_str()), &si, &pi))
 	{
 		std::cerr << "CreateProcess failed with the following error: " << GetLastError() << std::endl;
 		return response;
 	}
 
-	// Close handles to the child process and its primary thread.
-	// Some applications might keep these handles to monitor the status
-	// of the child process, for example.
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
+	// assign process with the job
+	if (!AssignProcessToJobObject(hJobObject, pi.hProcess))
+		std::cerr << "WARNING: AssignProcessToJobObject failed with the following error:" << GetLastError() << std::endl;
 
 	// Close handles to the stdin and stdout pipes no longer needed by the child process.
 	// If they are not explicitly closed, there is no way to recognize that the child process has ended.
-	hPipeOutWrite.reset();
-	hPipeInRead.reset();
+	CloseHandle(hPipeOutWrite);
+	CloseHandle(hPipeInRead);
 
 	// Write into input pipe
-	WriteToPipe(std::move(hPipeInWrite), std::move(data.input));
+	WriteToPipe(hPipeInWrite, std::move(data.input));
 
-	response.code = ProcessCode::Success;
-	response.output = ReadFromPipe(std::move(hPipeOutRead));
+	// start the thread
+	ResumeThread(pi.hThread);
+
+	switch (WaitForSingleObject(pi.hProcess, (DWORD)data.timeLimit.value_or(INFINITE)))
+	{
+	case WAIT_OBJECT_0:
+		response.code = ProcessCode::Success;
+		break;
+
+	case WAIT_TIMEOUT:
+		response.code = ProcessCode::TimeLimit;
+		break;
+
+	default:
+		response.code = ProcessCode::Failed;
+		break;
+	}
+
+	// check the memory limit
+	if (data.memoryLimit)
+	{
+		JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobExtLimit;
+		ZeroMemory(&jobExtLimit, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+		QueryInformationJobObject(hJobObject, JobObjectExtendedLimitInformation, &jobExtLimit, sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION), nullptr);
+
+		if ((jobExtLimit.PeakProcessMemoryUsed >> 20) > *data.memoryLimit)
+			response.code = ProcessCode::MemoryLimit;
+	}
+
+	// read the output only on success
+	if (ProcessCode::Success == response.code)
+		response.output = ReadFromPipe(hPipeOutRead);
+
+	CloseHandle(hPipeInWrite);
+	CloseHandle(hPipeOutRead);
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
+	TerminateJobObject(hJobObject, 0);
+
 	return response;
 }
 
-std::pair<upHandler, upHandler> Process_win::MakeInOutPipe(bool out) const
+std::pair<HANDLE, HANDLE> Process_win::MakeInOutPipe(bool out) const
 {
-	upHandler hRead{ new HANDLE };
-	upHandler hWrite{ new HANDLE };
+	HANDLE hRead = NULL, hWrite = NULL;
 
 	// Set the bInheritHandle flag so pipe handles are inherited.
 	SECURITY_ATTRIBUTES sa;
@@ -96,25 +125,25 @@ std::pair<upHandler, upHandler> Process_win::MakeInOutPipe(bool out) const
 	sa.lpSecurityDescriptor = nullptr;
 
 	// Create a pipe for the child process's STDOUT.
-	if (!CreatePipe(hRead.get(), hWrite.get(), &sa, 0))
-		return {};
+	if (CreatePipe(&hRead, &hWrite, &sa, 0))
+	{
+		// Ensure the read handle to the pipe for STDOUT is not inherited.
+		SetHandleInformation(out ? hRead : hWrite, HANDLE_FLAG_INHERIT, 0);
+	}
 
-	// Ensure the read handle to the pipe for STDOUT is not inherited.
-	SetHandleInformation(out ? hRead.get() : hWrite.get(), HANDLE_FLAG_INHERIT, 0);
-
-	return std::make_pair(std::move(hRead), std::move(hWrite));
+	return { hRead, hWrite };
 }
 
-void Process_win::WriteToPipe(upHandler hPipe, std::string data)
+void Process_win::WriteToPipe(HANDLE hPipe, std::string data)
 {
 	if (data.empty())
 		return;
 
-	if (!WriteFile(*hPipe, data.c_str(), (DWORD)data.size(), nullptr, nullptr))
+	if (!WriteFile(hPipe, data.c_str(), (DWORD)data.size(), nullptr, nullptr))
 		std::cerr << "Can`t write the data to the process (by pipe)" << std::endl;
 }
 
-std::string Process_win::ReadFromPipe(upHandler hPipe)
+std::string Process_win::ReadFromPipe(HANDLE hPipe)
 {
 	constexpr DWORD kBuffSize = 1024;
 	std::array<char, kBuffSize> buffer;
@@ -124,7 +153,7 @@ std::string Process_win::ReadFromPipe(upHandler hPipe)
 
 	for (;;)
 	{
-		if (!ReadFile(*hPipe, buffer.data(), kBuffSize, &nReadBytes, nullptr))
+		if (!ReadFile(hPipe, buffer.data(), kBuffSize, &nReadBytes, nullptr))
 			return result;
 		result.append(buffer.data(), nReadBytes);
 	}

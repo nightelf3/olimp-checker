@@ -14,6 +14,21 @@ void Process::Input(std::string input)
 	m_Data.input.append(1, '\n');
 }
 
+void Process::TimeLimit(size_t limitInMs)
+{
+	m_Data.timeLimit = limitInMs;
+}
+
+void Process::MemoryLimit(size_t limitInMb)
+{
+	m_Data.memoryLimit = limitInMb;
+}
+
+void Process::BandwidthLimit(size_t limitInMb)
+{
+	m_Data.bandwithLimit = limitInMb;
+}
+
 bool Process::Run(std::filesystem::path path, std::string params)
 {
 	if (!m_Impl)

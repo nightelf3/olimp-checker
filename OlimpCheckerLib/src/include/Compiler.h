@@ -11,7 +11,7 @@ public:
 	Compiler(std::string text, std::filesystem::path path, std::unique_ptr<ICompilerImpl> pImpl);
 
 	bool Run();
-	std::filesystem::path ExecutablePath() const { return m_ExecutablePath; }
+	const std::filesystem::path& ExecutablePath() const { return m_ExecutablePath; }
 	const std::string& Error() const { return m_Error; }
 
 	static std::unique_ptr<ICompilerImpl> MakeImplFromExtension(const std::string& extension);
