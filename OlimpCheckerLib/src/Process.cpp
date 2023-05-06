@@ -24,11 +24,6 @@ void Process::MemoryLimit(size_t limitInMb)
 	m_Data.memoryLimit = limitInMb;
 }
 
-void Process::BandwidthLimit(size_t limitInMb)
-{
-	m_Data.bandwithLimit = limitInMb;
-}
-
 bool Process::Run(std::filesystem::path path, std::string params)
 {
 	if (!m_Impl)

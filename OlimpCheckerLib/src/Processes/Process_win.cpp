@@ -26,16 +26,6 @@ ProcessResponse Process_win::Run(ProcessData data)
 	if (!hPipeOutRead || !hPipeOutWrite || !hPipeInRead || !hPipeInWrite)
 		return response;
 
-	HANDLE hJobObject = CreateJobObject(nullptr, nullptr);
-	if (data.bandwithLimit)
-	{
-		JOBOBJECT_NET_RATE_CONTROL_INFORMATION jobNetLimit;
-		ZeroMemory(&jobNetLimit, sizeof(JOBOBJECT_NET_RATE_CONTROL_INFORMATION));
-		jobNetLimit.ControlFlags = JOB_OBJECT_NET_RATE_CONTROL_ENABLE | JOB_OBJECT_NET_RATE_CONTROL_MAX_BANDWIDTH;
-		jobNetLimit.MaxBandwidth = *data.bandwithLimit;
-		SetInformationJobObject(hJobObject, JobObjectNetRateControlInformation, &jobNetLimit, sizeof(JOBOBJECT_NET_RATE_CONTROL_INFORMATION));
-	}
-
 	// Set up members of the STARTUPINFO structure.
 	// This structure specifies the STDIN and STDOUT handles for redirection.
 	STARTUPINFO si;
@@ -61,6 +51,7 @@ ProcessResponse Process_win::Run(ProcessData data)
 	}
 
 	// assign process with the job
+	HANDLE hJobObject = CreateJobObject(nullptr, nullptr);
 	if (!AssignProcessToJobObject(hJobObject, pi.hProcess))
 		std::cerr << "WARNING: AssignProcessToJobObject failed with the following error:" << GetLastError() << std::endl;
 
