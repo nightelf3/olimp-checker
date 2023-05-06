@@ -14,9 +14,10 @@
     <ClCompile Include="src\Compiler.cpp" />
     <ClCompile Include="src\Compilers\BaseCompilerImpl.cpp" />
     <ClCompile Include="src\Compilers\CppCompilerImpl.cpp" />
+    <ClCompile Include="src\Compilers\PyCompilerImpl.cpp" />
     <ClCompile Include="src\Config.cpp" />
-    <ClCompile Include="src\Executables\Process_win.cpp" />
     <ClCompile Include="src\Process.cpp" />
+    <ClCompile Include="src\Processes\Process_win.cpp" />
     <ClCompile Include="src\Request.cpp" />
     <ClCompile Include="src\Response.cpp" />
     <ClCompile Include="src\TaskPerformer.cpp" />
