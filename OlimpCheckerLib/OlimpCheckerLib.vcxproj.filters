@@ -94,6 +94,9 @@
     <ClInclude Include="src\include\Process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\include\Compilers\PyCompilerImpl.h">
+      <Filter>Header Files\Compilers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

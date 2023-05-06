@@ -12,6 +12,7 @@ public:
 
 	bool Run();
 	const std::filesystem::path& ExecutablePath() const { return m_ExecutablePath; }
+	const std::string& ExecutableParams() const { return m_ExecutableParams; }
 	const std::string& Error() const { return m_Error; }
 
 	static std::unique_ptr<ICompilerImpl> MakeImplFromExtension(const std::string& extension);
@@ -23,5 +24,6 @@ private:
 	std::unique_ptr<ICompilerImpl> m_pImpl;
 
 	std::filesystem::path m_ExecutablePath;
+	std::string m_ExecutableParams;
 	std::string m_Error;
 };

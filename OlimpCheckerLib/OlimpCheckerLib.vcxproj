@@ -25,6 +25,7 @@
   <ItemGroup>
     <ClInclude Include="src\include\Compilers\BaseCompilerImpl.h" />
     <ClInclude Include="src\include\Compilers\CppCompilerImpl.h" />
+    <ClInclude Include="src\include\Compilers\PyCompilerImpl.h" />
     <ClInclude Include="src\include\Config.h" />
     <ClInclude Include="src\include\Interfaces\ICompilerImpl.h" />
     <ClInclude Include="src\include\Interfaces\IConfigImpl.h" />

@@ -81,7 +81,7 @@ void TaskPerformer::Run(Request request)
 		process.MemoryLimit(m_MemoryLimit);
 
 		TaskState state = TaskState::Succeed;
-		if (process.Run(m_Compiler->ExecutablePath()))
+		if (process.Run(m_Compiler->ExecutablePath(), m_Compiler->ExecutableParams()))
 		{
 			if (!input.empty() && process.Output().empty())
 			{

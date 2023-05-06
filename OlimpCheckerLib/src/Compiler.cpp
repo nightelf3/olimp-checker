@@ -2,6 +2,7 @@
 
 #include "include/Compiler.h"
 #include "include/Compilers/CppCompilerImpl.h"
+#include "include/Compilers/PyCompilerImpl.h"
 
 #include <fstream>
 #include <format>
@@ -29,7 +30,7 @@ bool Compiler::Run()
 			return false;
 
 		// run the compilation
-		if (!m_pImpl->Compile(m_FilePath, m_ExecutablePath, m_Error) || !m_Error.empty())
+		if (!m_pImpl->Compile(m_FilePath, m_ExecutablePath, m_ExecutableParams, m_Error) || !m_Error.empty())
 			return false;
 	}
 	catch (const std::exception& ex)
@@ -56,6 +57,8 @@ std::unique_ptr<ICompilerImpl> Compiler::MakeImplFromExtension(const std::string
 {
 	if (extension == "c" || extension == "cpp")
 		return std::make_unique<CppCompilerImpl>();
+	else if (extension == "py")
+		return std::make_unique<PyCompilerImpl>();
 	std::cerr << "Unknown extension: " << extension << std::endl;
 	return {};
 }

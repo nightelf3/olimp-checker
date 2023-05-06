@@ -20,28 +20,32 @@ bool BaseCompilerImpl::CreateFile(const std::filesystem::path& path, const std::
 	return !!out;
 }
 
-bool BaseCompilerImpl::Compile(const std::filesystem::path& srcFile, std::filesystem::path& dstFile, std::string& error)
+bool BaseCompilerImpl::Compile(const std::filesystem::path& srcFile, std::filesystem::path& executablePath, std::string& executableParams, std::string& error)
 {
 	error.clear();
-	dstFile.clear();
+	executablePath.clear();
+	executableParams.clear();
 
 	// get the compilation string
-	std::filesystem::path exePath = MakeExecutablePath(srcFile);
+	auto [exePath, exeParams] = MakeExecutableParams(srcFile);
 	auto [path, params] = MakeCompilationParams(srcFile, exePath);
 
 	// run the compilation
 	Process process;
 	const bool bProcessReturn = process.Run(std::move(path), std::move(params));
 	if (bProcessReturn)
-		dstFile = std::move(exePath);
+	{
+		executablePath = std::move(exePath);
+		executableParams = std::move(exeParams);
+	}
 	error = CleanupError(process.MoveOutput(), srcFile);
 	return bProcessReturn;
 }
 
-std::filesystem::path BaseCompilerImpl::MakeExecutablePath(const std::filesystem::path& srcFile)
+std::pair<std::filesystem::path, std::string> BaseCompilerImpl::MakeExecutableParams(const std::filesystem::path& srcFile) const
 {
 	std::filesystem::path path = srcFile;
-	return path.replace_extension("exe");
+	return { path.replace_extension("exe"), std::string{} };
 }
 
 std::string BaseCompilerImpl::CleanupError(std::string error, const std::filesystem::path& path)

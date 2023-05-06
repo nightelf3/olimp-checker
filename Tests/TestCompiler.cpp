@@ -55,7 +55,7 @@ TEST(TestCompiler, ExceptionHandling)
 	std::unique_ptr<CompilerImplMock> pCompilerMock = std::make_unique<CompilerImplMock>();
 	EXPECT_CALL(*pCompilerMock, CreatePath(_)).WillRepeatedly(Return(true));
 	EXPECT_CALL(*pCompilerMock, CreateFile(_, _)).WillRepeatedly(Return(true));
-	EXPECT_CALL(*pCompilerMock, Compile(_, _, _)).WillRepeatedly([]() {
+	EXPECT_CALL(*pCompilerMock, Compile(_, _, _, _)).WillRepeatedly([]() {
 		throw std::exception("Fake exception");
 		return false;
 	});
@@ -102,4 +102,22 @@ TEST(TestCompiler, FailCppCompilation)
 	EXPECT_FALSE(compiler.Run());
 	const FileGuard exePath = compiler.ExecutablePath();
 	EXPECT_THAT(compiler.Error(), HasSubstr("undefined reference to"));
+}
+
+TEST(TestCompiler, RunPyCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RunPyCompilation.py";
+	std::string code = "print(\"Hello World!\")";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_TRUE(compiler.Run());
+	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
+}
+
+TEST(TestCompiler, FailPyCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "FailPyCompilation.py";
+	std::string code = "print(\"Hello World!\"";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_FALSE(compiler.Run());
+	EXPECT_THAT(compiler.Error(), HasSubstr("was never closed"));
 }
