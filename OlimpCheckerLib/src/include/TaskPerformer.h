@@ -33,8 +33,8 @@ private:
 	std::unique_ptr<Compiler> m_Compiler;
 
 	bool m_UseFiles = false;
-	std::string m_InputFile;
-	std::string m_OutputFile;
+	std::filesystem::path m_InputFile;
+	std::filesystem::path m_OutputFile;
 	int m_TimeLimit = 0; // ms
 	int m_MemoryLimit = 0; // Mb
 	std::vector<std::pair<std::string, std::string>> m_Tests;

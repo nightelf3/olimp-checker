@@ -55,7 +55,7 @@ TEST(TestCompiler, ExceptionHandling)
 	std::unique_ptr<CompilerImplMock> pCompilerMock = std::make_unique<CompilerImplMock>();
 	EXPECT_CALL(*pCompilerMock, CreatePath(_)).WillRepeatedly(Return(true));
 	EXPECT_CALL(*pCompilerMock, CreateFile(_, _)).WillRepeatedly(Return(true));
-	EXPECT_CALL(*pCompilerMock, Compile(_, _, _, _)).WillRepeatedly([]() {
+	EXPECT_CALL(*pCompilerMock, Compile(_, _, _)).WillRepeatedly([]() {
 		throw std::exception("Fake exception");
 		return false;
 	});
@@ -70,7 +70,7 @@ TEST(TestCompiler, RunCCompilation)
 	std::string code = "int main() { return 0; }";
 	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
 	EXPECT_TRUE(compiler.Run());
-	const FileGuard exePath = compiler.ExecutablePath();
+	const FileGuard exePath = compiler.ExecutableData();
 	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
 }
 
@@ -80,7 +80,7 @@ TEST(TestCompiler, FailCCompilation)
 	std::string code = "int main() { retrn 0; }";
 	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
 	EXPECT_FALSE(compiler.Run());
-	const FileGuard exePath = compiler.ExecutablePath();
+	const FileGuard exePath = compiler.ExecutableData();
 	EXPECT_THAT(compiler.Error(), HasSubstr("'retrn' was not declared in this scope"));
 }
 
@@ -90,7 +90,7 @@ TEST(TestCompiler, RunCppCompilation)
 	std::string code = "int main() { return 0; }";
 	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
 	EXPECT_TRUE(compiler.Run());
-	const FileGuard exePath = compiler.ExecutablePath();
+	const FileGuard exePath = compiler.ExecutableData();
 	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
 }
 
@@ -100,7 +100,7 @@ TEST(TestCompiler, FailCppCompilation)
 	std::string code = "int man() { return 0; }";
 	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
 	EXPECT_FALSE(compiler.Run());
-	const FileGuard exePath = compiler.ExecutablePath();
+	const FileGuard exePath = compiler.ExecutableData();
 	EXPECT_THAT(compiler.Error(), HasSubstr("undefined reference to"));
 }
 

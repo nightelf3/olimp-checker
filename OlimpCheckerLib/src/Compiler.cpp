@@ -30,7 +30,7 @@ bool Compiler::Run()
 			return false;
 
 		// run the compilation
-		if (!m_pImpl->Compile(m_FilePath, m_ExecutablePath, m_ExecutableParams, m_Error) || !m_Error.empty())
+		if (!m_pImpl->Compile(m_FilePath, m_ExecutableData, m_Error) || !m_Error.empty())
 			return false;
 	}
 	catch (const std::exception& ex)

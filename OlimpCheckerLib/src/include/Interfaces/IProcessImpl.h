@@ -18,10 +18,15 @@ struct ProcessResponse
 	std::string output;
 };
 
-struct ProcessData
+struct ExecutableData
 {
 	std::filesystem::path path;
 	std::string params;
+	std::filesystem::path workingDir;
+};
+
+struct ProcessData : public ExecutableData
+{
 	std::string input;
 	std::optional<size_t> memoryLimit;
 	std::optional<size_t> timeLimit;

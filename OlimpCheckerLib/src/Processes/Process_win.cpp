@@ -50,7 +50,7 @@ ProcessResponse Process_win::Run(ProcessData data)
 
 	// Create the child process.
 	const std::wstring cmd = std::format(L"{} {}", data.path.wstring(), std::wstring{ data.params.begin(), data.params.end()});
-	const std::wstring dir = data.path.parent_path().wstring();
+	const std::wstring dir = data.workingDir.wstring();
 	if (!CreateProcess(nullptr, const_cast<LPWSTR>(cmd.c_str()), nullptr, nullptr, TRUE,
 		CREATE_UNICODE_ENVIRONMENT | CREATE_SUSPENDED, nullptr, const_cast<LPWSTR>(dir.c_str()), &si, &pi))
 	{

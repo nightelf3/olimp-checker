@@ -8,8 +8,11 @@ TaskPerformer::TaskPerformer(const Json::Value& task)
 {
 	m_QueueId = task.get("queue_id", 0).asInt();
 	m_UseFiles = task.get("use_files", false).asBool();
-	m_InputFile = task.get("input_file", "input.dat").asString();
-	m_OutputFile = task.get("output_file", "output.rez").asString();
+	if (m_UseFiles)
+	{
+		m_InputFile = task.get("input_file", "input.dat").asString();
+		m_OutputFile = task.get("output_file", "output.rez").asString();
+	}
 	m_TimeLimit = task.get("time_limit", 0).asInt();
 	m_MemoryLimit = task.get("memory_limit", 0).asInt();
 
@@ -30,12 +33,16 @@ TaskPerformer::TaskPerformer(const Json::Value& task)
 		}
 	}
 
+	const std::string extension = task.get("extension", "").asString();
+	const std::filesystem::path path = Compiler::MakeFilePath(task.get("username", "").asString(), task.get("task_id", "").asString(), m_QueueId, extension);
 	std::string text;
 	if (const std::string error = macaron::Base64::Decode(task.get("text", "").asString(), text); error.empty())
+		m_Compiler = std::make_unique<Compiler>(std::move(text), path, Compiler::MakeImplFromExtension(extension));
+
+	if (m_UseFiles)
 	{
-		const std::string extension = task.get("extension", "").asString();
-		std::filesystem::path path = Compiler::MakeFilePath(task.get("username", "").asString(), task.get("task_id", "").asString(), m_QueueId, extension);
-		m_Compiler = std::make_unique<Compiler>(std::move(text), std::move(path), Compiler::MakeImplFromExtension(extension));
+		m_InputFile = path.parent_path() / m_InputFile;
+		m_OutputFile = path.parent_path() / m_OutputFile;
 	}
 }
 
@@ -79,9 +86,13 @@ void TaskPerformer::Run(Request request)
 		process.Input(input);
 		process.TimeLimit(m_TimeLimit);
 		process.MemoryLimit(m_MemoryLimit);
+		process.SysRestrictions(true);
+
+		if (m_UseFiles)
+			process.ReadWriteFiles(m_InputFile, m_OutputFile);
 
 		TaskState state = TaskState::Succeed;
-		if (process.Run(m_Compiler->ExecutablePath(), m_Compiler->ExecutableParams()))
+		if (process.Run(m_Compiler->ExecutableData()))
 		{
 			if (!input.empty() && process.Output().empty())
 			{
@@ -115,7 +126,7 @@ void TaskPerformer::Run(Request request)
 				break;
 			default:
 			case ProcessCode::Failed:
-				std::cerr << "WARNING: unknown process failing on test #" << nTest << " for: " << m_Compiler->ExecutablePath().string() << std::endl;
+				std::cerr << "WARNING: unknown process failing on test #" << nTest << " for: " << m_Compiler->ExecutableData().path.string() << std::endl;
 			case ProcessCode::RuntimeError:
 				state = TaskState::RuntimeError;
 				break;
