@@ -21,6 +21,21 @@ TEST(TestProcess, CustomParams)
 	EXPECT_THAT(process.MoveOutput(), HasSubstr("127.0.0.1:"));
 }
 
+TEST(TestProcess, SysRestirctions)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "SysRestirctions.cpp";
+	std::string code = R"---(
+		#include <windows.h>
+		int main() { ExitWindowsEx(EWX_LOGOFF, NULL); return 0; }
+	)---";
+	const FileGuard exePath = CompileCode(std::move(code), srcPath);
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	process.SysRestrictions(true);
+	EXPECT_TRUE(process.Run(exePath));
+}
+
 TEST(TestProcess, CppTimeLimit)
 {
 	const FileGuard srcPath = std::filesystem::temp_directory_path() / "CppTimeLimit.cpp";

@@ -36,6 +36,14 @@ ProcessResponse Process_win::Run(ProcessData data)
 	si.hStdInput = hPipeInRead;
 	si.dwFlags = STARTF_USESTDHANDLES;
 
+	HANDLE hJobObject = CreateJobObject(nullptr, nullptr);
+	if (data.sysRestrictions)
+	{
+		JOBOBJECT_BASIC_UI_RESTRICTIONS sysRestrioctions;
+		sysRestrioctions.UIRestrictionsClass = JOB_OBJECT_UILIMIT_ALL;
+		SetInformationJobObject(hJobObject, JobObjectBasicUIRestrictions, &sysRestrioctions, sizeof(JOBOBJECT_BASIC_UI_RESTRICTIONS));
+	}
+
 	// Set up members of the PROCESS_INFORMATION structure.
 	PROCESS_INFORMATION pi;
 	ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
@@ -51,7 +59,6 @@ ProcessResponse Process_win::Run(ProcessData data)
 	}
 
 	// assign process with the job
-	HANDLE hJobObject = CreateJobObject(nullptr, nullptr);
 	if (!AssignProcessToJobObject(hJobObject, pi.hProcess))
 		std::cerr << "WARNING: AssignProcessToJobObject failed with the following error:" << GetLastError() << std::endl;
 

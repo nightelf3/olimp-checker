@@ -25,6 +25,7 @@ struct ProcessData
 	std::string input;
 	std::optional<size_t> memoryLimit;
 	std::optional<size_t> timeLimit;
+	bool sysRestrictions = false;
 };
 
 struct IProcessImpl

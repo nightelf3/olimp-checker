@@ -24,6 +24,11 @@ void Process::MemoryLimit(size_t limitInMb)
 	m_Data.memoryLimit = limitInMb;
 }
 
+void Process::SysRestrictions(bool restriction)
+{
+	m_Data.sysRestrictions = restriction;
+}
+
 bool Process::Run(std::filesystem::path path, std::string params)
 {
 	if (!m_Impl)

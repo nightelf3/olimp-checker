@@ -10,6 +10,7 @@ public:
 	void Input(std::string input);
 	void TimeLimit(size_t limitInMs);
 	void MemoryLimit(size_t limitInMb);
+	void SysRestrictions(bool restriction);
 
 	bool Run(std::filesystem::path path, std::string params = {});
 
