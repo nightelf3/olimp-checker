@@ -13,7 +13,8 @@
 
 namespace
 {
-	constexpr std::chrono::milliseconds kSleepInterval = std::chrono::milliseconds{1000};
+	constexpr std::chrono::milliseconds kMinDelay = std::chrono::milliseconds{1000};
+	constexpr std::chrono::milliseconds kMaxDelay = std::chrono::milliseconds{8000};
 }
 
 Application::Application()
@@ -109,6 +110,7 @@ void Application::Run()
 		dotsPrinted = true;
 	};
 
+	std::chrono::milliseconds delay = kMinDelay;
 	do
 	{
 		//TODO: use 'limit' to get more tasks, default: 1
@@ -151,14 +153,18 @@ void Application::Run()
 					std::cerr << "WARNING: unknown message type: " << message << std::endl;
 				}
 			}
+
+			// reset the delay
+			delay = kMinDelay;
 		}
 		else
 		{
+			delay = (std::min)(delay * 2, kMaxDelay); // do exponential backoff
 			std::cerr << "WARNING: Message request failed" << std::endl;
 		}
 
 		// sleep for 1s
-		std::this_thread::sleep_for(kSleepInterval);
+		std::this_thread::sleep_for(delay);
 	} while (!_kbhit() || _getch() != 27);
 }
 
