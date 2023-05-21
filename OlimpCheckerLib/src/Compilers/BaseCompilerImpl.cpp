@@ -41,10 +41,16 @@ ExecutableData BaseCompilerImpl::MakeExecutableParams(const std::filesystem::pat
 	return { path.replace_extension("exe"), std::string{}, path.parent_path() };
 }
 
-std::string BaseCompilerImpl::CleanupError(std::string error, const std::filesystem::path& path)
+std::string BaseCompilerImpl::CleanupError(std::string error, const std::filesystem::path& path) const
 {
-	const std::string repalce = path.parent_path().string();
-	for (size_t startPos = 0; (startPos = error.find(repalce)) != std::string::npos;)
-		error.replace(startPos, repalce.size() + 1, "");
+	const std::vector<std::string> replaces = {
+		path.parent_path().string(),
+		std::filesystem::absolute({ "Compilers" }).string()
+	};
+	for (const std::string& replace : replaces)
+	{
+		for (size_t startPos = 0; (startPos = error.find(replace)) != std::string::npos;)
+			error.replace(startPos, replace.size() + 1, "");
+	}
 	return error;
 }

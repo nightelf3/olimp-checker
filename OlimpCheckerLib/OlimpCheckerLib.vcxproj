@@ -14,6 +14,7 @@
     <ClCompile Include="src\Compiler.cpp" />
     <ClCompile Include="src\Compilers\BaseCompilerImpl.cpp" />
     <ClCompile Include="src\Compilers\CppCompilerImpl.cpp" />
+    <ClCompile Include="src\Compilers\PasCompilerImpl.cpp" />
     <ClCompile Include="src\Compilers\PyCompilerImpl.cpp" />
     <ClCompile Include="src\Config.cpp" />
     <ClCompile Include="src\Process.cpp" />
@@ -25,6 +26,7 @@
   <ItemGroup>
     <ClInclude Include="src\include\Compilers\BaseCompilerImpl.h" />
     <ClInclude Include="src\include\Compilers\CppCompilerImpl.h" />
+    <ClInclude Include="src\include\Compilers\PasCompilerImpl.h" />
     <ClInclude Include="src\include\Compilers\PyCompilerImpl.h" />
     <ClInclude Include="src\include\Config.h" />
     <ClInclude Include="src\include\Interfaces\ICompilerImpl.h" />

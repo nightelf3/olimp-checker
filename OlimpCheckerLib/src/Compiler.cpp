@@ -2,6 +2,7 @@
 
 #include "include/Compiler.h"
 #include "include/Compilers/CppCompilerImpl.h"
+#include "include/Compilers/PasCompilerImpl.h"
 #include "include/Compilers/PyCompilerImpl.h"
 
 #include <fstream>
@@ -57,6 +58,8 @@ std::unique_ptr<ICompilerImpl> Compiler::MakeImplFromExtension(const std::string
 {
 	if (extension == "c" || extension == "cpp")
 		return std::make_unique<CppCompilerImpl>();
+	else if (extension == "pas")
+		return std::make_unique<PasCompilerImpl>();
 	else if (extension == "py")
 		return std::make_unique<PyCompilerImpl>();
 	std::cerr << "Unknown extension: " << extension << std::endl;

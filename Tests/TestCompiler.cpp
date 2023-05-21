@@ -104,6 +104,32 @@ TEST(TestCompiler, FailCppCompilation)
 	EXPECT_THAT(compiler.Error(), HasSubstr("undefined reference to"));
 }
 
+TEST(TestCompiler, RunPasCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RunPasCompilation.pas";
+	std::string code = R"---(
+		Begin
+		End.
+	)---";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_TRUE(compiler.Run());
+	const FileGuard exePath = compiler.ExecutableData();
+	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
+}
+
+TEST(TestCompiler, FailPasCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "FailPasCompilation.pas";
+	std::string code = R"---(
+		Begin
+		End
+	)---";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_FALSE(compiler.Run());
+	const FileGuard exePath = compiler.ExecutableData();
+	EXPECT_THAT(compiler.Error(), HasSubstr("Fatal: Syntax error"));
+}
+
 TEST(TestCompiler, RunPyCompilation)
 {
 	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RunPyCompilation.py";

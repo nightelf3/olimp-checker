@@ -13,5 +13,5 @@ protected:
 	virtual ExecutableData MakeCompilationParams(const std::filesystem::path& srcFile, const std::filesystem::path& dstFile) const = 0;
 	virtual ExecutableData MakeExecutableParams(const std::filesystem::path& srcFile) const;
 
-	static std::string CleanupError(std::string error, const std::filesystem::path& path);
+	virtual std::string CleanupError(std::string error, const std::filesystem::path& path) const;
 };

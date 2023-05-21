@@ -110,6 +110,102 @@ TEST(TestProcess, CppRuntimeError)
 	EXPECT_EQ(process.Code(), ProcessCode::RuntimeError);
 }
 
+TEST(TestProcess, PasFileInput)
+{
+	const std::string kInput = "Trololo\nLine2";
+	const FileGuard inFilePath = std::filesystem::temp_directory_path() / "PasFileInput.dat";
+	const FileGuard outFilePath = std::filesystem::temp_directory_path() / "PasFileInput.rez";
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "PasFileInput.pas";
+	std::string code = R"---(
+		Var S : String;
+				F : TextFile;
+				O : TextFile;
+		begin
+			Assign (F,'PasFileInput.dat');
+			Assign (O,'PasFileInput.rez');
+			Reset (F);
+			Rewrite(O);
+			While not Eof(f) do
+			Begin
+				Readln(F,S);
+				Writeln(O, S);
+			end;
+			Close (O);
+			Close (F);
+		end.
+	)---";
+	FileGuard exePath = CompileCode(std::move(code), srcPath);
+	exePath.PreventDeletion();
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	EXPECT_FALSE(inFilePath.Exists());
+	EXPECT_FALSE(outFilePath.Exists());
+
+	Process process;
+	process.ReadWriteFiles(inFilePath, outFilePath);
+	process.Input(kInput);
+	EXPECT_TRUE(process.Run(exePath));
+	EXPECT_THAT(process.MoveOutput(), HasSubstr(kInput));
+
+	EXPECT_TRUE(inFilePath.Exists());
+	EXPECT_TRUE(outFilePath.Exists());
+}
+
+TEST(TestProcess, PasTimeLimit)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "PasTimeLimit.pas";
+	std::string code = R"---(
+		begin
+			While True do
+				Begin
+				end;
+		end.
+	)---";
+	const FileGuard exePath = CompileCode(std::move(code), srcPath);
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	process.TimeLimit(1'000);
+	EXPECT_FALSE(process.Run(exePath));
+	EXPECT_EQ(process.Code(), ProcessCode::TimeLimit);
+}
+
+TEST(TestProcess, PasMemoryLimit)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "PasMemoryLimit.pas";
+	std::string code = R"---(
+		var sieve: array of longWord;
+		begin
+			setLength(sieve, 1000000);
+		end.
+	)---";
+	const FileGuard exePath = CompileCode(std::move(code), srcPath);
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	process.TimeLimit(1'000); // just in case
+	process.MemoryLimit(2);
+	EXPECT_FALSE(process.Run(exePath));
+	EXPECT_EQ(process.Code(), ProcessCode::MemoryLimit);
+}
+
+TEST(TestProcess, PasRuntimeError)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "PasRuntimeError.pas";
+	std::string code = R"---(
+		var number, zero : Integer;
+		begin
+			number := 1 div zero;
+		end.
+	)---";
+	const FileGuard exePath = CompileCode(std::move(code), srcPath);
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	EXPECT_FALSE(process.Run(exePath));
+	EXPECT_EQ(process.Code(), ProcessCode::RuntimeError);
+}
+
 TEST(TestProcess, PyFileInput)
 {
 	const std::string kInput = "Trololo\nLine2";
