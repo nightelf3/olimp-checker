@@ -165,3 +165,21 @@ TEST(TestCompiler, FailCSharpCompilation)
 	EXPECT_FALSE(compiler.Run());
 	EXPECT_THAT(compiler.Error(), HasSubstr("error CS1513: } expected"));
 }
+
+TEST(TestCompiler, RunJavaCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RunJavaCompilation.java";
+	std::string code = "class Program { public static void main(String[] args) { } }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_TRUE(compiler.Run());
+	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
+}
+
+TEST(TestCompiler, FailJavaCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "FailJavaCompilation.java";
+	std::string code = "class Program { public static void main(String[] args) { }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_FALSE(compiler.Run());
+	EXPECT_THAT(compiler.Error(), HasSubstr("error: reached end of file while parsing"));
+}

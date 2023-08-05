@@ -385,3 +385,96 @@ TEST(TestProcess, CSharpRuntimeError)
 	EXPECT_FALSE(process.Run(exeParams));
 	EXPECT_EQ(process.Code(), ProcessCode::RuntimeError);
 }
+
+TEST(TestProcess, JavaFileInput)
+{
+	const std::string kInput = "Trololo\nLine2";
+	const FileGuard inFilePath = std::filesystem::temp_directory_path() / "JavaFileInput.dat";
+	const FileGuard outFilePath = std::filesystem::temp_directory_path() / "JavaFileInput.rez";
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "JavaFileInput.java";
+	std::string code = R"---(
+		import java.io.*;
+		class Program {
+			public static void main(String [] args) {
+				try {
+					String fileName = "JavaFileInput.dat";
+					String fileOutput = "JavaFileInput.rez";
+
+					FileInputStream inputStream = new FileInputStream(fileName);
+					FileWriter fileWriter = new FileWriter(fileOutput);
+					BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+					byte[] buffer = new byte[1000];
+					while(inputStream.read(buffer) != -1) {
+						bufferedWriter.write(new String(buffer));
+						bufferedWriter.newLine();
+					}
+
+					inputStream.close();
+					bufferedWriter.close();
+				}
+				catch(FileNotFoundException ex) {
+				}
+				catch(IOException ex) {
+				}
+			}
+		}
+	)---";
+	FileGuard exePath = CompileCode(std::move(code), srcPath);
+	exePath.PreventDeletion();
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	EXPECT_FALSE(inFilePath.Exists());
+	EXPECT_FALSE(outFilePath.Exists());
+
+	Process process;
+	process.ReadWriteFiles(inFilePath, outFilePath);
+	process.Input(kInput);
+	EXPECT_TRUE(process.Run(exePath));
+	EXPECT_THAT(process.MoveOutput(), HasSubstr(kInput));
+
+	EXPECT_TRUE(inFilePath.Exists());
+	EXPECT_TRUE(outFilePath.Exists());
+}
+
+TEST(TestProcess, JavaTimeLimit)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "JavaTimeLimit.java";
+	std::string code = "class Program { public static void main(String [] args) { while (true); } }";
+	FileGuard exeParams = CompileCode(std::move(code), srcPath);
+	exeParams.PreventDeletion();
+	ASSERT_FALSE(exeParams.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	process.TimeLimit(1'000);
+	EXPECT_FALSE(process.Run(exeParams));
+	EXPECT_EQ(process.Code(), ProcessCode::TimeLimit);
+}
+
+TEST(TestProcess, JavaMemoryLimit)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "JavaMemoryLimit.java";
+	std::string code = "class Program { public static void main(String [] args) { byte[] buffer = new byte[1024*1024*10]; } }";
+	FileGuard exeParams = CompileCode(std::move(code), srcPath);
+	exeParams.PreventDeletion();
+	ASSERT_FALSE(exeParams.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	process.TimeLimit(1'000); // just in case
+	process.MemoryLimit(5);
+	EXPECT_FALSE(process.Run(exeParams));
+	EXPECT_EQ(process.Code(), ProcessCode::MemoryLimit);
+}
+
+TEST(TestProcess, JavaRuntimeError)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "JavaRuntimeError.java";
+	std::string code = "class Program { public static void main(String [] args) { int i = 0; int k = 100 / i; } }";
+	FileGuard exeParams = CompileCode(std::move(code), srcPath);
+	exeParams.PreventDeletion();
+	ASSERT_FALSE(exeParams.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	EXPECT_FALSE(process.Run(exeParams));
+	EXPECT_EQ(process.Code(), ProcessCode::RuntimeError);
+}
