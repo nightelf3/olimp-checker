@@ -277,3 +277,111 @@ TEST(TestProcess, PyRuntimeError)
 	EXPECT_FALSE(process.Run(exeParams));
 	EXPECT_EQ(process.Code(), ProcessCode::RuntimeError);
 }
+
+TEST(TestProcess, CSharpFileInput)
+{
+	const std::string kInput = "Trololo\nLine2";
+	const FileGuard inFilePath = std::filesystem::temp_directory_path() / "CSharpFileInput.dat";
+	const FileGuard outFilePath = std::filesystem::temp_directory_path() / "CSharpFileInput.rez";
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "CSharpFileInput.cs";
+	std::string code = R"---(
+		using System;
+		using System.IO;
+		public class HelloWorld
+		{
+			public static void Main(string[] args)
+			{
+				string[] lines = File.ReadAllLines("CSharpFileInput.dat");
+				using (StreamWriter outputFile = new StreamWriter("CSharpFileInput.rez"))
+				{
+					foreach (string line in lines)
+						outputFile.WriteLine(line);
+				}
+			}
+		}
+	)---";
+	FileGuard exePath = CompileCode(std::move(code), srcPath);
+	exePath.PreventDeletion();
+	ASSERT_FALSE(exePath.Path().empty()) << "Code is not compiled";
+
+	EXPECT_FALSE(inFilePath.Exists());
+	EXPECT_FALSE(outFilePath.Exists());
+
+	Process process;
+	process.ReadWriteFiles(inFilePath, outFilePath);
+	process.Input(kInput);
+	EXPECT_TRUE(process.Run(exePath));
+	EXPECT_THAT(process.MoveOutput(), HasSubstr(kInput));
+
+	EXPECT_TRUE(inFilePath.Exists());
+	EXPECT_TRUE(outFilePath.Exists());
+}
+
+TEST(TestProcess, CSharpTimeLimit)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "CSharpTimeLimit.cs";
+	std::string code = R"---(
+		public class HelloWorld
+		{
+			public static void Main(string[] args)
+			{
+				int a = 0;
+				while (true)
+					a++;
+			}
+		}
+	)---";
+	FileGuard exeParams = CompileCode(std::move(code), srcPath);
+	exeParams.PreventDeletion();
+	ASSERT_FALSE(exeParams.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	process.TimeLimit(1'000);
+	EXPECT_FALSE(process.Run(exeParams));
+	EXPECT_EQ(process.Code(), ProcessCode::TimeLimit);
+}
+
+TEST(TestProcess, CSharpMemoryLimit)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "CSharpMemoryLimit.cs";
+	std::string code = R"---(
+		public class HelloWorld
+		{
+			public static void Main(string[] args)
+			{
+				byte[] buffer = new byte[1024*1024*10];
+			}
+		}
+	)---";
+	FileGuard exeParams = CompileCode(std::move(code), srcPath);
+	exeParams.PreventDeletion();
+	ASSERT_FALSE(exeParams.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	process.TimeLimit(1'000); // just in case
+	process.MemoryLimit(5);
+	EXPECT_FALSE(process.Run(exeParams));
+	EXPECT_EQ(process.Code(), ProcessCode::MemoryLimit);
+}
+
+TEST(TestProcess, CSharpRuntimeError)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "CSharpRuntimeError.cs";
+	std::string code = R"---(
+		using System;
+		public class HelloWorld
+		{
+			public static void Main(string[] args)
+			{
+				throw new InvalidOperationException("Test Exception");
+			}
+		}
+	)---";
+	FileGuard exeParams = CompileCode(std::move(code), srcPath);
+	exeParams.PreventDeletion();
+	ASSERT_FALSE(exeParams.Path().empty()) << "Code is not compiled";
+
+	Process process;
+	EXPECT_FALSE(process.Run(exeParams));
+	EXPECT_EQ(process.Code(), ProcessCode::RuntimeError);
+}

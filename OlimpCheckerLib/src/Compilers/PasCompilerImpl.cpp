@@ -10,9 +10,9 @@ ExecutableData PasCompilerImpl::MakeCompilationParams(const std::filesystem::pat
 	return { std::move(path), std::move(params) };
 }
 
-std::string PasCompilerImpl::CleanupError(std::string error, const std::filesystem::path& path) const
+std::string PasCompilerImpl::CleanupError(std::string error, const std::filesystem::path& path, bool bProcessReturn) const
 {
 	if (error.find("Error:") == std::string::npos && error.find("Fatal:") == std::string::npos)
 		return {};
-	return __super::CleanupError(std::move(error), path);
+	return __super::CleanupError(std::move(error), path, bProcessReturn);
 }

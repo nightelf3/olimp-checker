@@ -147,3 +147,21 @@ TEST(TestCompiler, FailPyCompilation)
 	EXPECT_FALSE(compiler.Run());
 	EXPECT_THAT(compiler.Error(), HasSubstr("was never closed"));
 }
+
+TEST(TestCompiler, RunCSharpCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "RunCSharpCompilation.cs";
+	std::string code = "class HelloWorld { public static void Main(string[] args) { } }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_TRUE(compiler.Run());
+	EXPECT_EQ(compiler.Error().size(), 0) << "Compilation fails with the following message: " << compiler.Error();
+}
+
+TEST(TestCompiler, FailCSharpCompilation)
+{
+	const FileGuard srcPath = std::filesystem::temp_directory_path() / "FailCSharpCompilation.cs";
+	std::string code = "class HelloWorld { public static void Main(string[] args) { }";
+	Compiler compiler(std::move(code), srcPath, Compiler::MakeImplFromExtension(srcPath.Extension()));
+	EXPECT_FALSE(compiler.Run());
+	EXPECT_THAT(compiler.Error(), HasSubstr("error CS1513: } expected"));
+}

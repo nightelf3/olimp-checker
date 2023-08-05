@@ -31,7 +31,7 @@ bool BaseCompilerImpl::Compile(const std::filesystem::path& srcFile, ExecutableD
 	// run the compilation
 	Process process;
 	const bool bProcessReturn = process.Run(MakeCompilationParams(srcFile, exeData.path));
-	error = CleanupError(process.MoveOutput(), srcFile);
+	error = CleanupError(process.MoveOutput(), srcFile, bProcessReturn);
 	return bProcessReturn;
 }
 
@@ -41,7 +41,7 @@ ExecutableData BaseCompilerImpl::MakeExecutableParams(const std::filesystem::pat
 	return { path.replace_extension("exe"), std::string{}, path.parent_path() };
 }
 
-std::string BaseCompilerImpl::CleanupError(std::string error, const std::filesystem::path& path) const
+std::string BaseCompilerImpl::CleanupError(std::string error, const std::filesystem::path& path, bool bProcessReturn) const
 {
 	const std::vector<std::string> replaces = {
 		path.parent_path().string(),
